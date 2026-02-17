@@ -1,0 +1,1681 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Rentabilidad - Dropi Colombia 2026</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .header-info {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            flex-wrap: wrap;
+            margin-top: 15px;
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        /* KPI Section */
+        .kpi-section {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 25px;
+            border-left: 5px solid #28a745;
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .kpi-card {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            transition: transform 0.2s;
+        }
+
+        .kpi-card:hover {
+            transform: translateY(-2px);
+        }
+
+        .kpi-label {
+            font-size: 12px;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+
+        .kpi-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .kpi-value.large {
+            font-size: 28px;
+        }
+
+        .kpi-input {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: bold;
+            text-align: center;
+            transition: all 0.3s;
+        }
+
+        .kpi-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        /* Break Even Grid */
+        .break-even-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .break-even-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            text-align: center;
+        }
+
+        .break-even-title {
+            font-size: 14px;
+            opacity: 0.9;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .break-even-value {
+            font-size: 32px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .break-even-sub {
+            font-size: 14px;
+            opacity: 0.8;
+        }
+
+        .risk-bar-container {
+            margin-top: 15px;
+        }
+
+        .risk-bar {
+            width: 100%;
+            height: 10px;
+            background: rgba(255,255,255,0.3);
+            border-radius: 5px;
+            overflow: hidden;
+        }
+
+        .risk-fill {
+            height: 100%;
+            border-radius: 5px;
+            transition: width 0.5s;
+        }
+
+        .risk-fill.safe { background: #28a745; }
+        .risk-fill.warning { background: #ffc107; }
+        .risk-fill.danger { background: #dc3545; }
+
+        /* Margins Section - NUEVO */
+        .margins-section {
+            background: #e8f5e9;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 25px;
+            border-left: 5px solid #4caf50;
+        }
+
+        .margins-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 15px;
+        }
+
+        .margin-card {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+        }
+
+        .margin-label {
+            font-size: 12px;
+            color: #666;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+        }
+
+        .margin-value-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            margin-bottom: 5px;
+        }
+
+        .margin-value-cop {
+            font-size: 24px;
+            font-weight: bold;
+            color: #2e7d32;
+        }
+
+        .margin-value-pct {
+            font-size: 16px;
+            font-weight: 600;
+            color: #66bb6a;
+        }
+
+        .margin-description {
+            font-size: 11px;
+            color: #888;
+            margin-top: 5px;
+        }
+
+        /* Product Info Section */
+        .product-section {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 25px;
+            border-left: 5px solid #6c757d;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-label {
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .form-input {
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        /* Excel Upload Section */
+        .excel-section {
+            background: #fff3cd;
+            border: 2px dashed #ffc107;
+            border-radius: 15px;
+            padding: 30px;
+            text-align: center;
+            margin-bottom: 25px;
+            transition: all 0.3s;
+        }
+
+        .excel-section.dragover {
+            background: #d4edda;
+            border-color: #28a745;
+        }
+
+        .excel-section.processed {
+            background: #d4edda;
+            border-color: #28a745;
+            border-style: solid;
+        }
+
+        .upload-icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+        }
+
+        .upload-text {
+            font-size: 16px;
+            color: #856404;
+            margin-bottom: 10px;
+        }
+
+        .upload-hint {
+            font-size: 13px;
+            color: #856404;
+            opacity: 0.8;
+        }
+
+        #fileInput {
+            display: none;
+        }
+
+        .btn-upload {
+            background: #ffc107;
+            color: #333;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            margin-top: 15px;
+            transition: all 0.3s;
+        }
+
+        .btn-upload:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+
+        .excel-results {
+            margin-top: 20px;
+            text-align: left;
+            display: none;
+        }
+
+        .excel-results.show {
+            display: block;
+        }
+
+        .metric-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(0,0,0,0.1);
+        }
+
+        .metric-label {
+            color: #856404;
+        }
+
+        .metric-value {
+            font-weight: bold;
+            color: #333;
+        }
+
+        .metric-value.success { color: #28a745; }
+        .metric-value.warning { color: #ffc107; }
+        .metric-value.danger { color: #dc3545; }
+
+        /* Offers Section */
+        .offers-section {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 25px;
+            border-left: 5px solid #17a2b8;
+        }
+
+        .offers-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .offer-card {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            border-top: 4px solid #17a2b8;
+        }
+
+        .offer-qty {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 10px;
+        }
+
+        .offer-price {
+            font-size: 20px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .offer-margin {
+            font-size: 14px;
+            padding: 5px 10px;
+            border-radius: 20px;
+            display: inline-block;
+        }
+
+        .offer-margin.positive {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .offer-margin.negative {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        /* Admin Costs Section */
+        .admin-section {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 25px;
+            border-left: 5px solid #6f42c1;
+        }
+
+        .admin-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            padding: 10px 0;
+        }
+
+        .admin-content {
+            display: none;
+            margin-top: 20px;
+        }
+
+        .admin-content.show {
+            display: block;
+        }
+
+        .toggle-icon {
+            font-size: 20px;
+            transition: transform 0.3s;
+        }
+
+        .toggle-icon.rotate {
+            transform: rotate(180deg);
+        }
+
+        .trm-section {
+            background: #e9ecef;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .trm-row {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .trm-input-group {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .costs-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+
+        .costs-table th,
+        .costs-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .costs-table th {
+            background: #e9ecef;
+            font-size: 13px;
+            text-transform: uppercase;
+            color: #666;
+        }
+
+        .costs-table input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .costs-table input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .costs-table .usd-input {
+            text-align: right;
+        }
+
+        .costs-table .cop-display {
+            color: #666;
+            font-size: 13px;
+        }
+
+        .add-row-btn {
+            background: #6f42c1;
+            color: white;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            margin-bottom: 20px;
+        }
+
+        .add-row-btn:hover {
+            background: #5a32a3;
+        }
+
+        .delete-row-btn {
+            background: #dc3545;
+            color: white;
+            padding: 6px 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .total-calculation {
+            background: white;
+            border: 3px solid #6f42c1;
+            border-radius: 12px;
+            padding: 25px;
+            margin-top: 20px;
+            box-shadow: 0 4px 15px rgba(111, 66, 193, 0.2);
+        }
+
+        .total-calculation-header {
+            font-size: 16px;
+            font-weight: bold;
+            color: #6f42c1;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .total-row {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr;
+            gap: 20px;
+            align-items: center;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+
+        .total-label {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .total-value {
+            text-align: right;
+            font-size: 16px;
+        }
+
+        .total-value.highlight {
+            font-size: 20px;
+            font-weight: bold;
+            color: #6f42c1;
+        }
+
+        .units-divisor {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 2px dashed #dee2e6;
+        }
+
+        .units-divisor label {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .units-divisor input {
+            width: 100px;
+            padding: 10px;
+            border: 2px solid #6f42c1;
+            border-radius: 6px;
+            text-align: center;
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .final-calculation {
+            background: linear-gradient(135deg, #6f42c1 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 15px;
+            text-align: center;
+        }
+
+        .final-calculation-label {
+            font-size: 14px;
+            opacity: 0.9;
+            margin-bottom: 5px;
+        }
+
+        .final-calculation-value {
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        /* Secondary Data */
+        .secondary-section {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 25px;
+            border-left: 5px solid #6c757d;
+        }
+
+        .secondary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .secondary-item {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .secondary-label {
+            font-size: 13px;
+            color: #666;
+        }
+
+        .secondary-value {
+            font-weight: bold;
+            color: #333;
+        }
+
+        /* Footer Actions */
+        .footer-actions {
+            background: #f8f9fa;
+            padding: 25px;
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            justify-content: center;
+            border-top: 1px solid #dee2e6;
+        }
+
+        .btn-action {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s;
+        }
+
+        .btn-action:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-info {
+            background: #17a2b8;
+            color: white;
+        }
+
+        /* History Section */
+        .history-section {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 25px;
+            border-left: 5px solid #20c997;
+        }
+
+        .history-chart {
+            height: 200px;
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 15px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .history-placeholder {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: #666;
+            font-size: 14px;
+        }
+
+        .status-success {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-warning {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-danger {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 22px;
+            }
+            
+            .kpi-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .break-even-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .total-row {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+            
+            .footer-actions {
+                flex-direction: column;
+            }
+            
+            .btn-action {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+        }
+
+        .loading-overlay.show {
+            display: flex;
+        }
+
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            border-radius: 10px;
+            color: white;
+            font-weight: 600;
+            z-index: 9999;
+            transform: translateX(400px);
+            transition: transform 0.3s;
+        }
+
+        .toast.show {
+            transform: translateX(0);
+        }
+
+        .toast.success { background: #28a745; }
+        .toast.error { background: #dc3545; }
+        .toast.warning { background: #ffc107; color: #333; }
+
+        .manual-vars {
+            background: #e3f2fd;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .manual-vars-title {
+            font-weight: bold;
+            color: #1976d2;
+            margin-bottom: 15px;
+        }
+
+        .var-row {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .var-item {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .var-label {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .var-input {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #1976d2;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .var-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+    </style>
+</head>
+<body>
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-spinner"></div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <div class="container" id="appContainer">
+        <!-- Header -->
+        <div class="header">
+            <h1>📊 Calculadora de Rentabilidad Dropi Colombia 2026</h1>
+            <div class="header-info">
+                <span>📅 <span id="currentDate"></span></span>
+                <span>💱 TRM: $<span id="displayTrm">4.355</span> COP/USD</span>
+                <span id="fileStatus">📁 Sin archivo cargado</span>
+            </div>
+        </div>
+
+        <div class="content">
+            <!-- KPI Section -->
+            <div class="kpi-section">
+                <div class="section-title">
+                    🔥 Indicadores Principales (KPI)
+                </div>
+                
+                <!-- Manual Variables -->
+                <div class="manual-vars">
+                    <div class="manual-vars-title">⚙️ Variables Manuales Base</div>
+                    <div class="var-row">
+                        <div class="var-item">
+                            <div class="var-label">Costo Unitario del Producto ($)</div>
+                            <input type="number" class="var-input" id="costoProductoManual" value="28900" onchange="updateAllCalculations()">
+                        </div>
+                        <div class="var-item">
+                            <div class="var-label">Costo Envío Promedio ($)</div>
+                            <input type="number" class="var-input" id="costoEnvioManual" value="20000" onchange="updateAllCalculations()">
+                        </div>
+                        <div class="var-item">
+                            <div class="var-label">% Cancelaciones Base</div>
+                            <input type="number" class="var-input" id="pctCancelacionesManual" value="15" step="0.1" onchange="updateAllCalculations()">
+                        </div>
+                        <div class="var-item">
+                            <div class="var-label">% Devoluciones Base</div>
+                            <input type="number" class="var-input" id="pctDevolucionesManual" value="15" step="0.1" onchange="updateAllCalculations()">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="kpi-grid">
+                    <div class="kpi-card">
+                        <div class="kpi-label">Precio de Venta</div>
+                        <input type="number" class="kpi-input" id="precioVenta" value="99500" placeholder="Ej: 99500" onchange="updateAllCalculations()">
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-label">Costo Final Antes de Pauta</div>
+                        <div class="kpi-value" id="displayCostoFinal">$61.028</div>
+                        <div style="font-size: 11px; color: #999; margin-top: 5px;" id="displayCostoFinalPct">(61.3%)</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-label">CPA Objetivo (Calculado)</div>
+                        <div class="kpi-value" id="displayCpaObjetivo">$25.000</div>
+                    </div>
+                </div>
+
+                <!-- Break Even Grid -->
+                <div class="break-even-grid">
+                    <div class="break-even-card">
+                        <div class="break-even-title">🎯 Punto de Equilibrio</div>
+                        <div class="break-even-value" id="displayBreakEven">$--</div>
+                        <div class="break-even-sub">CPA Máximo sin pérdidas</div>
+                        <div class="risk-bar-container">
+                            <div class="risk-bar">
+                                <div class="risk-fill" id="riskFillBreakEven" style="width: 0%"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="break-even-card">
+                        <div class="break-even-title">📈 ROAS Break-Even</div>
+                        <div class="break-even-value" id="displayRoas">--</div>
+                        <div class="break-even-sub">Return on Ad Spend mínimo</div>
+                        <div class="risk-bar-container">
+                            <div class="risk-bar">
+                                <div class="risk-fill" id="riskFillRoas" style="width: 0%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- NUEVA SECCIÓN: MÁRGENES DE UTILIDAD -->
+            <div class="margins-section">
+                <div class="section-title">
+                    💰 Márgenes de Utilidad
+                </div>
+                <div class="margins-grid">
+                    <div class="margin-card">
+                        <div class="margin-label">Margen Antes de Pauta</div>
+                        <div class="margin-value-row">
+                            <span class="margin-value-cop" id="displayMargenAntes">$43.302</span>
+                            <span class="margin-value-pct" id="displayMargenAntesPct">(43.5%)</span>
+                        </div>
+                        <div class="margin-description">Precio Venta - Costo Final</div>
+                    </div>
+                    <div class="margin-card">
+                        <div class="margin-label">Margen Después de Pauta</div>
+                        <div class="margin-value-row">
+                            <span class="margin-value-cop" id="displayMargenDespues">$18.302</span>
+                            <span class="margin-value-pct" id="displayMargenDespuesPct">(18.4%)</span>
+                        </div>
+                        <div class="margin-description">Margen Antes - CPA Objetivo</div>
+                    </div>
+                    <div class="margin-card">
+                        <div class="margin-label">% Utilidad Final (Objetivo: 20-25%)</div>
+                        <div class="margin-value-row">
+                            <span class="margin-value-cop" id="displayUtilidad">18.4%</span>
+                        </div>
+                        <div class="margin-description">Utilidad / Precio Venta</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Product Info Section -->
+            <div class="product-section">
+                <div class="section-title">
+                    📦 Información del Producto
+                </div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label class="form-label">Nombre del Producto</label>
+                        <input type="text" class="form-input" id="nombreProducto" placeholder="Ej: Tabla Acero 30x40">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">ID Dropi</label>
+                        <input type="text" class="form-input" id="idDropi" placeholder="Ej: 1923802">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Proveedor</label>
+                        <input type="text" class="form-input" id="proveedor" placeholder="Ej: Dropi Colombia">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Unidades Disponibles</label>
+                        <input type="number" class="form-input" id="unidadesDisponibles" placeholder="Ej: 100">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Excel Upload Section -->
+            <div class="excel-section" id="excelSection">
+                <div class="upload-icon">📁</div>
+                <div class="upload-text">Arrastra tu archivo Excel de Dropi aquí (Opcional - Mes 2+)</div>
+                <div class="upload-hint">Solo para actualizar flete real del mes anterior. Si no subes archivo, usa valores base.</div>
+                <input type="file" id="fileInput" accept=".xlsx,.xls">
+                <button class="btn-upload" onclick="document.getElementById('fileInput').click()">
+                    Seleccionar Archivo
+                </button>
+                
+                <div class="excel-results" id="excelResults">
+                    <div style="font-weight: bold; margin-bottom: 15px; color: #155724;">✅ Datos procesados del mes anterior:</div>
+                    <div class="metric-row">
+                        <span class="metric-label">Flete Promedio Real:</span>
+                        <span class="metric-value" id="resFlete">--</span>
+                    </div>
+                    <div class="metric-row">
+                        <span class="metric-label">Órdenes analizadas:</span>
+                        <span class="metric-value" id="resOrdenes">--</span>
+                    </div>
+                    <div style="margin-top: 15px; padding: 10px; background: #d4edda; border-radius: 5px; font-size: 13px; color: #155724;">
+                        ✅ Este valor reemplazará al "Costo Envío Promedio" base en los cálculos
+                    </div>
+                </div>
+            </div>
+
+            <!-- Offers Section -->
+            <div class="offers-section">
+                <div class="section-title">
+                    🏷️ Cálculo de Ofertas Pre-Compra
+                </div>
+                <div class="offers-grid" id="offersGrid">
+                    <!-- Generated dynamically -->
+                </div>
+            </div>
+
+            <!-- Admin Costs Section -->
+            <div class="admin-section">
+                <div class="admin-header" onclick="toggleAdmin()">
+                    <div class="section-title" style="margin: 0;">
+                        ⚙️ Costos Administrativos (Detalle)
+                    </div>
+                    <span class="toggle-icon" id="toggleIcon">▼</span>
+                </div>
+                
+                <div class="admin-content" id="adminContent">
+                    <!-- TRM Section -->
+                    <div class="trm-section">
+                        <div class="trm-row">
+                            <div class="trm-input-group">
+                                <label class="form-label">TRM Promedio del Mes (COP/USD)</label>
+                                <input type="number" class="form-input" id="trmValue" value="4355" onchange="updateAllCalculations()">
+                            </div>
+                            <div class="trm-input-group">
+                                <label class="form-label">Fecha de actualización</label>
+                                <input type="date" class="form-input" id="trmDate">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Costs Table -->
+                    <table class="costs-table" id="costsTable">
+                        <thead>
+                            <tr>
+                                <th>Concepto</th>
+                                <th>USD</th>
+                                <th>COP</th>
+                                <th>Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody id="costsTableBody">
+                            <!-- Rows generated by JS -->
+                        </tbody>
+                    </table>
+
+                    <button class="add-row-btn" onclick="addCostRow()">+ Agregar Concepto</button>
+
+                    <!-- TOTAL ROW - STANDALONE -->
+                    <div class="total-calculation">
+                        <div class="total-calculation-header">
+                            📊 CÁLCULO FINAL DE COSTOS ADMINISTRATIVOS
+                        </div>
+                        
+                        <div class="total-row">
+                            <div class="total-label">TOTAL COSTOS ADMINISTRATIVOS (Suma de todos los conceptos)</div>
+                            <div class="total-value" id="totalUsd">$0 USD</div>
+                            <div class="total-value highlight" id="totalCop">$0 COP</div>
+                            <div></div>
+                        </div>
+
+                        <div class="units-divisor">
+                            <label>Unidades vendidas (divisor):</label>
+                            <input type="number" id="unidadesDivisor" value="150" min="1" onchange="updateAllCalculations()">
+                            <span style="color: #666; font-size: 14px;">Unidades</span>
+                        </div>
+
+                        <div class="final-calculation">
+                            <div class="final-calculation-label">COSTO ADMINISTRATIVO POR UNIDAD</div>
+                            <div class="final-calculation-value" id="costoPorUnidad">$0</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Secondary Data -->
+            <div class="secondary-section">
+                <div class="section-title" style="cursor: pointer;" onclick="toggleSecondary()">
+                    📋 Datos Secundarios (Click para expandir)
+                    <span id="secondaryToggle">▼</span>
+                </div>
+                <div class="secondary-grid" id="secondaryGrid" style="display: none;">
+                    <div class="secondary-item">
+                        <span class="secondary-label">Costo Envío Promedio</span>
+                        <span class="secondary-value" id="secFlete">$20.000</span>
+                    </div>
+                    <div class="secondary-item">
+                        <span class="secondary-label">% Cancelaciones</span>
+                        <span class="secondary-value" id="secCancelaciones">15%</span>
+                    </div>
+                    <div class="secondary-item">
+                        <span class="secondary-label">Costo Cancelaciones</span>
+                        <span class="secondary-value" id="secCostoCancelaciones">$3.750</span>
+                    </div>
+                    <div class="secondary-item">
+                        <span class="secondary-label">% Devoluciones</span>
+                        <span class="secondary-value" id="secDevoluciones">15%</span>
+                    </div>
+                    <div class="secondary-item">
+                        <span class="secondary-label">Costo Devoluciones</span>
+                        <span class="secondary-value" id="secCostoDevoluciones">$6.750</span>
+                    </div>
+                    <div class="secondary-item">
+                        <span class="secondary-label">% Comisión Plataforma</span>
+                        <span class="secondary-value">0%</span>
+                    </div>
+                    <div class="secondary-item">
+                        <span class="secondary-label">Comisión Plataforma</span>
+                        <span class="secondary-value">$0</span>
+                    </div>
+                    <div class="secondary-item">
+                        <span class="secondary-label">Impuestos</span>
+                        <span class="secondary-value">0%</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- History Section -->
+            <div class="history-section">
+                <div class="section-title">
+                    📈 Historial (Últimos 12 meses)
+                </div>
+                <div class="history-chart" id="historyChart">
+                    <div class="history-placeholder">
+                        No hay datos históricos guardados aún
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer Actions -->
+        <div class="footer-actions">
+            <button class="btn-action btn-primary" onclick="exportImage()">
+                📸 Exportar como Imagen
+            </button>
+            <button class="btn-action btn-success" onclick="exportPDF()">
+                📄 Exportar como PDF
+            </button>
+            <button class="btn-action btn-info" onclick="saveToHistory()">
+                💾 Guardar en Historial
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Global state
+        let appData = {
+            currentMonth: null,
+            excelData: null,
+            history: [],
+            costosAdministrativos: [
+                { concepto: 'Shopify', usd: 25 },
+                { concepto: 'Releasit', usd: 10 },
+                { concepto: 'Minutos Movil', usd: 2 },
+                { concepto: 'Herramientas', usd: 15 },
+                { concepto: 'GoDaddy', usd: 4.08 },
+                { concepto: 'Otros', usd: 0 }
+            ],
+            fleteReal: null
+        };
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeApp();
+            setupEventListeners();
+            loadHistory();
+            updateAllCalculations();
+        });
+
+        function initializeApp() {
+            const now = new Date();
+            document.getElementById('currentDate').textContent = now.toLocaleDateString('es-CO');
+            document.getElementById('trmDate').valueAsDate = now;
+            renderCostsTable();
+        }
+
+        function setupEventListeners() {
+            const fileInput = document.getElementById('fileInput');
+            const excelSection = document.getElementById('excelSection');
+            
+            fileInput.addEventListener('change', handleFileSelect);
+            
+            excelSection.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                excelSection.classList.add('dragover');
+            });
+            
+            excelSection.addEventListener('dragleave', () => {
+                excelSection.classList.remove('dragover');
+            });
+            
+            excelSection.addEventListener('drop', (e) => {
+                e.preventDefault();
+                excelSection.classList.remove('dragover');
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    processExcelFile(files[0]);
+                }
+            });
+        }
+
+        function handleFileSelect(e) {
+            const file = e.target.files[0];
+            if (file) {
+                processExcelFile(file);
+            }
+        }
+
+        function processExcelFile(file) {
+            showLoading(true);
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                    const jsonData = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
+                    
+                    const fletePromedio = calcularFletePromedio(jsonData);
+                    appData.fleteReal = fletePromedio;
+                    
+                    document.getElementById('fileStatus').textContent = `✅ ${file.name} procesado`;
+                    document.getElementById('excelSection').classList.add('processed');
+                    document.querySelector('.upload-text').textContent = '✅ Archivo procesado - Flete actualizado';
+                    document.getElementById('excelResults').classList.add('show');
+                    document.getElementById('resFlete').textContent = `$${Math.round(fletePromedio).toLocaleString()}`;
+                    document.getElementById('resOrdenes').textContent = 'Calculado';
+                    document.getElementById('costoEnvioManual').value = Math.round(fletePromedio);
+                    
+                    showToast('Flete promedio actualizado con datos reales', 'success');
+                    updateAllCalculations();
+                    
+                } catch (error) {
+                    showToast('Error al procesar: ' + error.message, 'error');
+                } finally {
+                    showLoading(false);
+                    document.getElementById('fileInput').value = '';
+                }
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        function calcularFletePromedio(data) {
+            if (data.length < 2) return 20000;
+            
+            const headers = data[0].map(h => h.toString().toUpperCase().trim());
+            const idxFlete = headers.indexOf('PRECIO FLETE');
+            
+            if (idxFlete === -1) return 20000;
+            
+            let totalFlete = 0;
+            let count = 0;
+            
+            for (let i = 1; i < data.length; i++) {
+                const row = data[i];
+                if (!row || row.length === 0) continue;
+                
+                const flete = parseFloat(row[idxFlete]) || 0;
+                if (flete > 0) {
+                    totalFlete += flete;
+                    count++;
+                }
+            }
+            
+            return count > 0 ? totalFlete / count : 20000;
+        }
+
+        function renderCostsTable() {
+            const tbody = document.getElementById('costsTableBody');
+            tbody.innerHTML = '';
+            
+            appData.costosAdministrativos.forEach((item, index) => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td><input type="text" value="${item.concepto}" onchange="updateCostRow(${index}, 'concepto', this.value)"></td>
+                    <td><input type="number" class="usd-input" value="${item.usd}" step="0.01" onchange="updateCostRow(${index}, 'usd', this.value)"></td>
+                    <td class="cop-display" id="cop-${index}">$${(item.usd * getTrm()).toLocaleString()}</td>
+                    <td><button class="delete-row-btn" onclick="deleteCostRow(${index})" ${appData.costosAdministrativos.length <= 1 ? 'disabled' : ''}>Eliminar</button></td>
+                `;
+                tbody.appendChild(tr);
+            });
+            
+            updateTotalCalculation();
+        }
+
+        function updateCostRow(index, field, value) {
+            if (field === 'usd') {
+                appData.costosAdministrativos[index][field] = parseFloat(value) || 0;
+            } else {
+                appData.costosAdministrativos[index][field] = value;
+            }
+            renderCostsTable();
+            updateAllCalculations();
+        }
+
+        function addCostRow() {
+            appData.costosAdministrativos.push({ concepto: 'Nuevo Concepto', usd: 0 });
+            renderCostsTable();
+        }
+
+        function deleteCostRow(index) {
+            if (appData.costosAdministrativos.length > 1) {
+                appData.costosAdministrativos.splice(index, 1);
+                renderCostsTable();
+                updateAllCalculations();
+            }
+        }
+
+        function getTrm() {
+            return parseFloat(document.getElementById('trmValue').value) || 4355;
+        }
+
+        function updateTotalCalculation() {
+            const trm = getTrm();
+            let totalUsd = 0;
+            
+            appData.costosAdministrativos.forEach((item, index) => {
+                totalUsd += item.usd;
+                const copCell = document.getElementById(`cop-${index}`);
+                if (copCell) {
+                    copCell.textContent = `$${(item.usd * trm).toLocaleString()}`;
+                }
+            });
+            
+            const totalCop = totalUsd * trm;
+            const unidades = parseInt(document.getElementById('unidadesDivisor').value) || 150;
+            const porUnidad = unidades > 0 ? totalCop / unidades : 0;
+            
+            document.getElementById('totalUsd').textContent = `$${totalUsd.toLocaleString()} USD`;
+            document.getElementById('totalCop').textContent = `$${Math.round(totalCop).toLocaleString()} COP`;
+            document.getElementById('costoPorUnidad').textContent = `$${Math.round(porUnidad).toLocaleString()}`;
+            
+            return porUnidad;
+        }
+
+        function calcularCpaObjetivo(precioVenta) {
+            if (precioVenta <= 60000) return 20000;
+            if (precioVenta <= 100000) return 25000;
+            if (precioVenta <= 150000) return 30000;
+            return 35000;
+        }
+
+        function updateAllCalculations() {
+            const trm = getTrm();
+            document.getElementById('displayTrm').textContent = trm.toLocaleString();
+            
+            // Variables manuales base
+            const costoProducto = parseFloat(document.getElementById('costoProductoManual').value) || 28900;
+            const costoEnvio = appData.fleteReal || parseFloat(document.getElementById('costoEnvioManual').value) || 20000;
+            const pctCancelaciones = (parseFloat(document.getElementById('pctCancelacionesManual').value) || 15) / 100;
+            const pctDevoluciones = (parseFloat(document.getElementById('pctDevolucionesManual').value) || 15) / 100;
+            const precioVenta = parseFloat(document.getElementById('precioVenta').value) || 0;
+            
+            // CPA Objetivo calculado automáticamente
+            const cpaObjetivo = calcularCpaObjetivo(precioVenta);
+            document.getElementById('displayCpaObjetivo').textContent = `$${cpaObjetivo.toLocaleString()}`;
+            
+            // Costos administrativos
+            const costoAdminPorUnidad = updateTotalCalculation();
+            
+            // ✅ CORRECCIÓN: Costo Cancelaciones = CPA × % cancelaciones
+            const costoCancelaciones = cpaObjetivo * pctCancelaciones;
+            
+            // Costo Devoluciones = (Flete + CPA) × % devoluciones
+            const costoDevoluciones = (costoEnvio + cpaObjetivo) * pctDevoluciones;
+            
+            // Costo final antes de pauta
+            const costoFinalAntesPauta = costoProducto + costoEnvio + costoCancelaciones + costoDevoluciones + costoAdminPorUnidad;
+            
+            // Margen antes de pauta (= Punto de Equilibrio según Excel)
+            const margenAntesPauta = precioVenta - costoFinalAntesPauta;
+            const puntoEquilibrio = margenAntesPauta; // Son lo mismo
+            
+            // ROAS Break-even
+            const roasBreakEven = puntoEquilibrio > 0 ? (precioVenta / puntoEquilibrio) : 0;
+            
+            // Margen después de pauta
+            const margenDespuesPauta = margenAntesPauta - cpaObjetivo;
+            const pctUtilidad = precioVenta > 0 ? (margenDespuesPauta / precioVenta) * 100 : 0;
+            
+            // Porcentajes relativos al precio
+            const pctCostoFinal = precioVenta > 0 ? (costoFinalAntesPauta / precioVenta) * 100 : 0;
+            const pctMargenAntes = precioVenta > 0 ? (margenAntesPauta / precioVenta) * 100 : 0;
+            
+            // Update UI - Costo Final
+            document.getElementById('displayCostoFinal').textContent = `$${Math.round(costoFinalAntesPauta).toLocaleString()}`;
+            document.getElementById('displayCostoFinalPct').textContent = `(${pctCostoFinal.toFixed(1)}%)`;
+            
+            // Update UI - Punto de Equilibrio y ROAS
+            document.getElementById('displayBreakEven').textContent = `$${Math.max(0, Math.round(puntoEquilibrio)).toLocaleString()}`;
+            document.getElementById('displayRoas').textContent = roasBreakEven > 0 ? roasBreakEven.toFixed(2) : '--';
+            
+            // Update UI - Márgenes
+            document.getElementById('displayMargenAntes').textContent = `$${Math.round(margenAntesPauta).toLocaleString()}`;
+            document.getElementById('displayMargenAntesPct').textContent = `(${pctMargenAntes.toFixed(1)}%)`;
+            document.getElementById('displayMargenDespues').textContent = `$${Math.round(margenDespuesPauta).toLocaleString()}`;
+            document.getElementById('displayMargenDespuesPct').textContent = `(${pctUtilidad.toFixed(1)}%)`;
+            document.getElementById('displayUtilidad').textContent = `${pctUtilidad.toFixed(1)}%`;
+            
+            // Color coding para utilidad
+            const utilidadDisplay = document.getElementById('displayUtilidad');
+            if (pctUtilidad < 15) {
+                utilidadDisplay.className = 'margin-value-cop status-danger';
+            } else if (pctUtilidad < 20) {
+                utilidadDisplay.className = 'margin-value-cop status-warning';
+            } else {
+                utilidadDisplay.className = 'margin-value-cop status-success';
+            }
+            
+            // Risk bars
+            const riskPct = cpaObjetivo > 0 && puntoEquilibrio > 0 ? (cpaObjetivo / puntoEquilibrio) * 100 : 0;
+            
+            const riskFillBreakEven = document.getElementById('riskFillBreakEven');
+            riskFillBreakEven.style.width = `${Math.min(riskPct, 100)}%`;
+            if (riskPct < 50) riskFillBreakEven.className = 'risk-fill safe';
+            else if (riskPct < 80) riskFillBreakEven.className = 'risk-fill warning';
+            else riskFillBreakEven.className = 'risk-fill danger';
+            
+            const riskFillRoas = document.getElementById('riskFillRoas');
+            const roasPct = roasBreakEven > 0 ? Math.min((roasBreakEven / 4) * 100, 100) : 0;
+            riskFillRoas.style.width = `${roasPct}%`;
+            if (roasBreakEven >= 3) riskFillRoas.className = 'risk-fill safe';
+            else if (roasBreakEven >= 2) riskFillRoas.className = 'risk-fill warning';
+            else riskFillRoas.className = 'risk-fill danger';
+            
+            // Update secondary data
+            document.getElementById('secFlete').textContent = `$${Math.round(costoEnvio).toLocaleString()}`;
+            document.getElementById('secCancelaciones').textContent = `${(pctCancelaciones * 100).toFixed(1)}%`;
+            document.getElementById('secCostoCancelaciones').textContent = `$${Math.round(costoCancelaciones).toLocaleString()}`;
+            document.getElementById('secDevoluciones').textContent = `${(pctDevoluciones * 100).toFixed(1)}%`;
+            document.getElementById('secCostoDevoluciones').textContent = `$${Math.round(costoDevoluciones).toLocaleString()}`;
+            
+            // Update offers
+            renderOffers(precioVenta, costoProducto, costoEnvio, costoCancelaciones, costoDevoluciones, costoAdminPorUnidad, cpaObjetivo);
+        }
+
+        function renderOffers(precioVenta, costoProducto, costoEnvio, costoCancelaciones, costoDevoluciones, costoAdmin, cpa) {
+            const offers = [
+                { qty: 1, desc: '1 Unidad', discount: 0 },
+                { qty: 2, desc: '2 Unidades (30% off)', discount: 0.30 },
+                { qty: 3, desc: '3 Unidades (40% off)', discount: 0.40 }
+            ];
+            
+            const grid = document.getElementById('offersGrid');
+            grid.innerHTML = '';
+            
+            offers.forEach(offer => {
+                const price = Math.round(precioVenta * offer.qty * (1 - offer.discount));
+                
+                const costoProdTotal = costoProducto * offer.qty;
+                const costoEnvioTotal = costoEnvio * offer.qty;
+                const costoCancelTotal = costoCancelaciones * offer.qty;
+                const costoDevolTotal = costoDevoluciones * offer.qty;
+                const costoAdminTotal = costoAdmin * offer.qty;
+                const cpaTotal = cpa * offer.qty;
+                
+                const costoTotal = costoProdTotal + costoEnvioTotal + costoCancelTotal + costoDevolTotal + costoAdminTotal + cpaTotal;
+                const margen = price - costoTotal;
+                const pctMargen = price > 0 ? (margen / price) * 100 : 0;
+                
+                const card = document.createElement('div');
+                card.className = 'offer-card';
+                card.innerHTML = `
+                    <div class="offer-qty">${offer.desc}</div>
+                    <div class="offer-price">$${price.toLocaleString()}</div>
+                    <div style="font-size: 12px; color: #666; margin: 5px 0;">Costo: $${Math.round(costoTotal).toLocaleString()}</div>
+                    <div class="offer-margin ${margen >= 0 ? 'positive' : 'negative'}">
+                        ${margen >= 0 ? '+' : ''}${pctMargen.toFixed(1)}%
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function toggleAdmin() {
+            const content = document.getElementById('adminContent');
+            const icon = document.getElementById('toggleIcon');
+            content.classList.toggle('show');
+            icon.classList.toggle('rotate');
+        }
+
+        function toggleSecondary() {
+            const grid = document.getElementById('secondaryGrid');
+            const toggle = document.getElementById('secondaryToggle');
+            if (grid.style.display === 'none') {
+                grid.style.display = 'grid';
+                toggle.textContent = '▲';
+            } else {
+                grid.style.display = 'none';
+                toggle.textContent = '▼';
+            }
+        }
+
+        function saveToHistory() {
+            const monthData = {
+                periodo: new Date().toISOString().slice(0, 7),
+                fecha: new Date().toISOString(),
+                fletePromedio: appData.fleteReal || parseFloat(document.getElementById('costoEnvioManual').value) || 20000,
+                costoProducto: parseFloat(document.getElementById('costoProductoManual').value) || 28900,
+                trm: getTrm(),
+                producto: document.getElementById('nombreProducto').value || 'Sin nombre',
+                precioVenta: parseFloat(document.getElementById('precioVenta').value) || 0,
+                utilidadPct: parseFloat(document.getElementById('displayUtilidad').textContent) || 0,
+                puntoEquilibrio: parseFloat(document.getElementById('displayBreakEven').textContent.replace(/[$,]/g, '')) || 0,
+                roas: parseFloat(document.getElementById('displayRoas').textContent) || 0
+            };
+            
+            appData.history = appData.history.filter(h => h.periodo !== monthData.periodo);
+            appData.history.push(monthData);
+            appData.history.sort((a, b) => b.periodo.localeCompare(a.periodo));
+            if (appData.history.length > 12) {
+                appData.history = appData.history.slice(0, 12);
+            }
+            
+            localStorage.setItem('calculadoraRentabilidad_history', JSON.stringify(appData.history));
+            
+            updateHistoryChart();
+            showToast('Datos guardados en historial', 'success');
+        }
+
+        function loadHistory() {
+            const saved = localStorage.getItem('calculadoraRentabilidad_history');
+            if (saved) {
+                appData.history = JSON.parse(saved);
+                updateHistoryChart();
+            }
+        }
+
+        function updateHistoryChart() {
+            const chart = document.getElementById('historyChart');
+            
+            if (appData.history.length === 0) {
+                chart.innerHTML = '<div class="history-placeholder">No hay datos históricos guardados aún</div>';
+                return;
+            }
+            
+            const maxValue = Math.max(...appData.history.map(h => h.fletePromedio));
+            const bars = appData.history.map(h => {
+                const height = (h.fletePromedio / maxValue) * 100;
+                return `
+                    <div style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%;">
+                        <div style="width: 80%; background: linear-gradient(to top, #667eea, #764ba2); height: ${height}%; border-radius: 4px 4px 0 0; position: relative;">
+                            <div style="position: absolute; top: -25px; left: 50%; transform: translateX(-50%); font-size: 11px; white-space: nowrap;">
+                                $${(h.fletePromedio / 1000).toFixed(0)}k
+                            </div>
+                        </div>
+                        <div style="font-size: 10px; margin-top: 5px; color: #666;">${h.periodo.slice(5)}</div>
+                    </div>
+                `;
+            }).join('');
+            
+            chart.innerHTML = `<div style="display: flex; height: 100%; align-items: flex-end; padding: 10px;">${bars}</div>`;
+        }
+
+        function exportImage() {
+            showLoading(true);
+            html2canvas(document.getElementById('appContainer')).then(canvas => {
+                const link = document.createElement('a');
+                link.download = `calculadora-rentabilidad-${new Date().toISOString().slice(0, 10)}.png`;
+                link.href = canvas.toDataURL();
+                link.click();
+                showLoading(false);
+                showToast('Imagen descargada', 'success');
+            }).catch(err => {
+                showLoading(false);
+                showToast('Error al exportar imagen', 'error');
+            });
+        }
+
+        function exportPDF() {
+            showLoading(true);
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF('p', 'mm', 'a4');
+            
+            html2canvas(document.getElementById('appContainer')).then(canvas => {
+                const imgData = canvas.toDataURL('image/png');
+                const imgWidth = 210;
+                const pageHeight = 297;
+                const imgHeight = canvas.height * imgWidth / canvas.width;
+                let heightLeft = imgHeight;
+                let position = 0;
+                
+                doc.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+                heightLeft -= pageHeight;
+                
+                while (heightLeft >= 0) {
+                    position = heightLeft - imgHeight;
+                    doc.addPage();
+                    doc.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+                    heightLeft -= pageHeight;
+                }
+                
+                doc.save(`calculadora-rentabilidad-${new Date().toISOString().slice(0, 10)}.pdf`);
+                showLoading(false);
+                showToast('PDF descargado', 'success');
+            }).catch(err => {
+                showLoading(false);
+                showToast('Error al exportar PDF', 'error');
+            });
+        }
+
+        function showLoading(show) {
+            document.getElementById('loadingOverlay').classList.toggle('show', show);
+        }
+
+        function showToast(message, type) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = `toast ${type}`;
+            toast.classList.add('show');
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
